@@ -29,22 +29,51 @@ namespace ManagementOfMossadAgentsAPI.Controllers
             return await _context.Agents.Include(a => a.Location).ToListAsync();
         }
 
-        // GET: api/Agents/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Agent>> GetAgent(Guid? id)
+        // יצירת סוכן חדש
+        // POST: api/Agents
+        [HttpPost]
+        public async Task<ActionResult<Agent>> PostAgent(Agent agent)
         {
-            var agent = await _context.Agents.FindAsync(id);
-
-            if (agent == null)
-            {
-                return NotFound();
-            }
+            _context.Agents.Add(agent);
+            await _context.SaveChangesAsync();
 
             return agent;
         }
 
+        // עדכון מיקום של סוכן
+        async Task<ActionResult<Agent>> UpdateLocation(Guid? id, Location location)
+        {
+            var agent = await _context
+                .Agents.Include(a => a.Location)
+                .FirstOrDefaultAsync(a => a.Id == id);
+            if (agent == null)
+            {
+                return NotFound();
+            }
+            if (agent.Location == null)
+            {
+                agent.Location = location;
+                _context.Locations.Add(location);
+            }
+            else
+            {
+                agent.Location.x = location.x;
+                agent.Location.y = location.y;
+            }
+            _context.SaveChanges();
+            return agent;
+        }
+
+        // קביעת מיקום התחלתי של הסוכן
+        // PUT: api/Agents/{id}/pin
+        [HttpPut("{id}/pin")]
+        public async Task<ActionResult<Agent>> PutAgent(Guid? id, Location location)
+        {
+            // שליחה לפונקציה שמעדכנת את המיקום
+            return await UpdateLocation(id, location);
+        }
+
         // PUT: api/Agents/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutAgent(Guid? id, Agent agent)
         {
@@ -72,17 +101,6 @@ namespace ManagementOfMossadAgentsAPI.Controllers
             }
 
             return NoContent();
-        }
-
-        // POST: api/Agents
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Agent>> PostAgent(Agent agent)
-        {
-            _context.Agents.Add(agent);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetAgent", new { id = agent.Id }, agent);
         }
 
         // DELETE: api/Agents/5

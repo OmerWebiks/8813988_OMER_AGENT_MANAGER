@@ -9,9 +9,13 @@ namespace ManagementOfMossadAgentsAPI.Models
         public string Nickname { get; set; }
         public Location? Location { get; set; }
 
-        // מגדיר קבוע של סטטוס
-        [AllowedValues(typeof(Enum.AgentStatus.Status))]
         public string? Status { get; set; }
         public string Image { get; set; }
+
+        public Agent()
+        {
+            Id = Guid.NewGuid();
+            Status = Enum.AgentStatus.Status.DORMANT.ToString();
+        }
     }
 }

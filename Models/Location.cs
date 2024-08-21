@@ -1,8 +1,11 @@
-﻿namespace ManagementOfMossadAgentsAPI.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ManagementOfMossadAgentsAPI.Models
 {
     public class Location
     {
-        public Guid Id { get; set; }
+        [Key]
+        public Guid? Id { get; set; }
         public int x { get; set; }
         public int y { get; set; }
 
