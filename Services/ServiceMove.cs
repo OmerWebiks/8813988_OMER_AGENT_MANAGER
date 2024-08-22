@@ -1,9 +1,12 @@
-﻿namespace ManagementOfMossadAgentsAPI.Services
+﻿using ManagementOfMossadAgentsAPI.Models;
+
+namespace ManagementOfMossadAgentsAPI.Services
 {
     public class ServiceMove
     {
         public string Location { get; set; }
 
+        // dict של התזוזות על המסך
         public Dictionary<string, List<int>> MoveDictionary = new Dictionary<string, List<int>>
         {
             {

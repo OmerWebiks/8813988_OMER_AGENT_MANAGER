@@ -16,10 +16,12 @@ namespace ManagementOfMossadAgentsAPI.Controllers
     public class AgentsController : ControllerBase
     {
         private readonly ManagementOfMossadAgentsDbContext _context;
+        private readonly ServiceAgent _serviceAgent;
 
         public AgentsController(ManagementOfMossadAgentsDbContext context)
         {
             _context = context;
+            _serviceAgent = new ServiceAgent(_context);
         }
 
         // GET: api/Agents
@@ -41,8 +43,16 @@ namespace ManagementOfMossadAgentsAPI.Controllers
             return agent;
         }
 
-        // עדכון מיקום של סוכן
-        async Task<ActionResult<Agent>> UpdateLocation(Guid? id, Location location)
+        // קביעת מיקום התחלתי של הסוכן
+        // PUT: api/Agents/{id}/pin
+        [HttpPut("{id}/pin")]
+        public async Task<ActionResult<Agent>> PutAgent(Guid? id, Location location)
+        {
+            return await UpdateLocationPin(id, location);
+        }
+
+        // עדכון מיקום של סוכן בהצבה הראשונה
+        async Task<ActionResult<Agent>> UpdateLocationPin(Guid? id, Location location)
         {
             var agent = await _context
                 .Agents.Include(a => a.Location)
@@ -55,23 +65,18 @@ namespace ManagementOfMossadAgentsAPI.Controllers
             {
                 agent.Location = location;
                 _context.Locations.Add(location);
+                _context.SaveChanges();
+                await _serviceAgent.MissionCheckAgent(agent);
             }
             else
             {
-                agent.Location.x += location.x;
-                agent.Location.y += location.y;
+                return StatusCode(
+                    StatusCodes.Status400BadRequest,
+                    new { error = "Agent already has a location." }
+                );
             }
-            _context.SaveChanges();
-            return agent;
-        }
 
-        // קביעת מיקום התחלתי של הסוכן
-        // PUT: api/Agents/{id}/pin
-        [HttpPut("{id}/pin")]
-        public async Task<ActionResult<Agent>> PutAgent(Guid? id, Location location)
-        {
-            // שליחה לפונקציה שמעדכנת את המיקום
-            return await UpdateLocation(id, location);
+            return agent;
         }
 
         // הזזת סוכן למיקום מסויים
@@ -84,7 +89,41 @@ namespace ManagementOfMossadAgentsAPI.Controllers
 
             Location loc = new Location(dictionaryMove[0], dictionaryMove[1]);
             // שליחה לפונקציה שמעדכנת את המיקום
-            return await UpdateLocation(id, loc);
+            return await UpdateLocationMove(id, loc);
+        }
+
+        // עדכון מיקום של סוכן
+        async Task<ActionResult<Agent>> UpdateLocationMove(Guid? id, Location location)
+        {
+            var agent = await _context
+                .Agents.Include(a => a.Location)
+                .FirstOrDefaultAsync(a => a.Id == id);
+            if (agent == null)
+            {
+                return NotFound();
+            }
+            if (agent.Status != Enum.AgentStatus.Status.IN_ACTIVITY.ToString())
+            {
+                if (agent.Location == null)
+                {
+                    return StatusCode(
+                        StatusCodes.Status400BadRequest,
+                        new { error = "Agent does not have a location" }
+                    );
+                }
+                else
+                {
+                    agent.Location.x += location.x;
+                    agent.Location.y += location.y;
+                }
+                _context.SaveChanges();
+
+                return agent;
+            }
+            return StatusCode(
+                StatusCodes.Status400BadRequest,
+                new { error = "Agent is in activity" }
+            );
         }
 
         //// PUT: api/Agents/5
