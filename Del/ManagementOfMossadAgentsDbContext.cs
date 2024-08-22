@@ -37,11 +37,10 @@ namespace ManagementOfMossadAgentsAPI.Del
             Agents.Add(
                 new Agent
                 {
-                    Id = Guid.NewGuid(),
                     Nickname = "Zara",
                     Location = new Location(50, 40),
                     Status = Enum.AgentStatus.Status.DORMANT.ToString(),
-                    Image = "fdndfdfn"
+                    PhotoUrl = "fdndfdfn"
                 }
             );
             SaveChanges();
@@ -52,9 +51,8 @@ namespace ManagementOfMossadAgentsAPI.Del
             Targets.Add(
                 new Target
                 {
-                    Id = Guid.NewGuid(),
                     Name = "Zara",
-                    Role = "Manager",
+                    Position = "Manager",
                     Location = new Location(30, 20),
                     Status = Enum.TargetStatus.Status.LIVE.ToString(),
                 }
@@ -67,7 +65,6 @@ namespace ManagementOfMossadAgentsAPI.Del
             Missions.Add(
                 new Mission
                 {
-                    Id = Guid.NewGuid(),
                     Agent = Agents.First(),
                     Target = Targets.First(),
                     TimeLeft = 50,

@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ManagementOfMossadAgentsAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class AgentsController : ControllerBase
     {
@@ -35,24 +35,24 @@ namespace ManagementOfMossadAgentsAPI.Controllers
         // יצירת סוכן חדש
         // POST: api/Agents
         [HttpPost]
-        public async Task<ActionResult<Agent>> PostAgent(Agent agent)
+        public async Task<IActionResult> PostAgent(Agent agent)
         {
-            _context.Agents.Add(agent);
+            var result = _context.Agents.Add(agent);
             await _context.SaveChangesAsync();
 
-            return agent;
+            return StatusCode(StatusCodes.Status201Created, new { id = result.Entity.Id });
         }
 
         // קביעת מיקום התחלתי של הסוכן
         // PUT: api/Agents/{id}/pin
         [HttpPut("{id}/pin")]
-        public async Task<ActionResult<Agent>> PutAgent(Guid? id, Location location)
+        public async Task<ActionResult<Agent>> PutAgent(int id, Location location)
         {
             return await UpdateLocationPin(id, location);
         }
 
         // עדכון מיקום של סוכן בהצבה הראשונה
-        async Task<ActionResult<Agent>> UpdateLocationPin(Guid? id, Location location)
+        async Task<ActionResult<Agent>> UpdateLocationPin(int id, Location location)
         {
             var agent = await _context
                 .Agents.Include(a => a.Location)
@@ -82,7 +82,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
         // הזזת סוכן למיקום מסויים
         //// PUT: api/Agents/{id}/move
         [HttpPut("{id}/move")]
-        public async Task<ActionResult<Agent>> PutAgent(Guid? id, ServiceMove location)
+        public async Task<ActionResult<Agent>> PutAgent(int id, ServiceMove location)
         {
             ServiceMove serviceMove = new ServiceMove();
             var dictionaryMove = serviceMove.MoveDictionary[location.Location];
@@ -93,7 +93,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
         }
 
         // עדכון מיקום של סוכן
-        async Task<ActionResult<Agent>> UpdateLocationMove(Guid? id, Location location)
+        async Task<ActionResult<Agent>> UpdateLocationMove(int id, Location location)
         {
             var agent = await _context
                 .Agents.Include(a => a.Location)
@@ -113,8 +113,8 @@ namespace ManagementOfMossadAgentsAPI.Controllers
                 }
                 else
                 {
-                    agent.Location.x += location.x;
-                    agent.Location.y += location.y;
+                    agent.Location.X += location.X;
+                    agent.Location.Y += location.Y;
                 }
                 _context.SaveChanges();
 
@@ -172,7 +172,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
         //    return NoContent();
         //}
 
-        private bool AgentExists(Guid? id)
+        private bool AgentExists(int id)
         {
             return _context.Agents.Any(e => e.Id == id);
         }

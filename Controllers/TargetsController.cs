@@ -4,13 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using ManagementOfMossadAgentsAPI.Del;
 using ManagementOfMossadAgentsAPI.Models;
+using ManagementOfMossadAgentsAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace ManagementOfMossadAgentsAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class TargetsController : ControllerBase
     {
@@ -28,79 +29,50 @@ namespace ManagementOfMossadAgentsAPI.Controllers
             return await _context.Targets.ToListAsync();
         }
 
-        // GET: api/Targets/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Target>> GetTarget(Guid? id)
-        {
-            var target = await _context.Targets.FindAsync(id);
-
-            if (target == null)
-            {
-                return NotFound();
-            }
-
-            return target;
-        }
-
-        // PUT: api/Targets/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTarget(Guid? id, Target target)
-        {
-            if (id != target.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(target).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TargetExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-
+        // יצירת מטרה חדשה
         // POST: api/Targets
         [HttpPost]
         public async Task<ActionResult<Target>> PostTarget(Target target)
         {
-            _context.Targets.Add(target);
+            var result = _context.Targets.Add(target);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTarget", new { id = target.Id }, target);
+            return StatusCode(StatusCodes.Status201Created, new { id = result.Entity.Id });
         }
 
-        // DELETE: api/Targets/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTarget(Guid? id)
+        // קביעת מיקום התחלתי של המטרה
+        // PUT: api/Targets/{id}/pin
+        [HttpPut("{id}/pin")]
+        public async Task<ActionResult<Target>> PutTarget(int id, Location location)
         {
-            var target = await _context.Targets.FindAsync(id);
+            return await UpdateLocationPin(id, location);
+        }
+
+        // עדכון מיקום של סוכן בהצבה הראשונה
+        async Task<ActionResult<Target>> UpdateLocationPin(int id, Location location)
+        {
+            var target = await _context
+                .Targets.Include(a => a.Location)
+                .FirstOrDefaultAsync(a => a.Id == id);
             if (target == null)
             {
                 return NotFound();
             }
+            if (target.Location == null)
+            {
+                target.Location = location;
+                _context.Locations.Add(location);
+                _context.SaveChanges();
+            }
+            else
+            {
+                return StatusCode(
+                    StatusCodes.Status400BadRequest,
+                    new { error = "Agent already has a location." }
+                );
+            }
 
-            _context.Targets.Remove(target);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool TargetExists(Guid? id)
-        {
-            return _context.Targets.Any(e => e.Id == id);
+            return target;
         }
     }
 }

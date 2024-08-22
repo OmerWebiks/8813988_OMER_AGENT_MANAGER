@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ManagementOfMossadAgentsAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class MissionsController : ControllerBase
     {
@@ -19,25 +19,6 @@ namespace ManagementOfMossadAgentsAPI.Controllers
         public MissionsController(ManagementOfMossadAgentsDbContext context)
         {
             _context = context;
-        }
-
-        // פונקציה שבודקת אם יש ליד הסוכן מטרה שעומדת בקרטוריונים
-        public async Task<Agent> CrewCheck()
-        {
-            var agents = await _context.Agents.ToListAsync();
-            var Targets = await _context.Targets.ToListAsync();
-
-            foreach (var agent in agents)
-            {
-                foreach (var target in Targets)
-                {
-                    if (agent.Location.Id == target.Location.Id)
-                    {
-                        return agent;
-                    }
-                }
-            }
-            return null;
         }
 
         // GET: api/Missions
@@ -64,7 +45,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
         // PUT: api/Missions/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutMission(Guid? id, Mission mission)
+        public async Task<IActionResult> PutMission(int id, Mission mission)
         {
             if (id != mission.Id)
             {
@@ -105,7 +86,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
 
         // DELETE: api/Missions/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteMission(Guid? id)
+        public async Task<IActionResult> DeleteMission(int id)
         {
             var mission = await _context.Missions.FindAsync(id);
             if (mission == null)
@@ -119,7 +100,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
             return NoContent();
         }
 
-        private bool MissionExists(Guid? id)
+        private bool MissionExists(int id)
         {
             return _context.Missions.Any(e => e.Id == id);
         }

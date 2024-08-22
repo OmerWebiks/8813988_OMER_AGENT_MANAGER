@@ -1,5 +1,6 @@
 ﻿using ManagementOfMossadAgentsAPI.Del;
 using ManagementOfMossadAgentsAPI.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace ManagementOfMossadAgentsAPI.Services
 {
@@ -15,21 +16,24 @@ namespace ManagementOfMossadAgentsAPI.Services
         // פונקציה שעוברת על כל המטרות עבור סוכן אחד
         public async Task MissionCheckAgent(Agent agent)
         {
-            double minDistance = 0;
+            double minDistance = 1000;
             Target thisTarget = null;
 
-            var targets = _context.Targets.ToList();
+            var targets = await _context.Targets.Include(a => a.Location).ToListAsync();
 
-            foreach (var target in targets)
+            foreach (Target target in targets)
             {
-                var distance = Math.Sqrt(
-                    Math.Pow(agent.Location.x - target.Location.x, 2)
-                        + Math.Pow(agent.Location.y - target.Location.y, 2)
-                );
-
-                if (distance <= 200)
+                if (
+                    target.Status == Enum.TargetStatus.Status.LIVE.ToString()
+                    && target.Location != null
+                )
                 {
-                    if (target.Status == Enum.TargetStatus.Status.LIVE.ToString())
+                    var distance = Math.Sqrt(
+                        Math.Pow(agent.Location.X - target.Location.X, 2)
+                            + Math.Pow(agent.Location.Y - target.Location.Y, 2)
+                    );
+
+                    if (distance <= 200)
                     {
                         if (distance <= minDistance)
                         {

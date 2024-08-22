@@ -5,7 +5,7 @@ namespace ManagementOfMossadAgentsAPI.Models
     public class Mission
     {
         [Key]
-        public Guid Id { get; set; }
+        public int Id { get; set; }
         public Agent Agent { get; set; }
         public Target Target { get; set; }
         public float? TimeLeft { get; set; }
@@ -17,7 +17,6 @@ namespace ManagementOfMossadAgentsAPI.Models
 
         public Mission()
         {
-            Id = Guid.NewGuid();
             Status = Enum.MissionStatus.Status.PROPOSAL.ToString();
         }
     }
