@@ -54,9 +54,11 @@ namespace ManagementOfMossadAgentsAPI.Controllers
         // עדכון מיקום של סוכן בהצבה הראשונה
         async Task<ActionResult<Agent>> UpdateLocationPin(int id, Location location)
         {
+            // הבאת הסוכן עם המיקום
             var agent = await _context
                 .Agents.Include(a => a.Location)
                 .FirstOrDefaultAsync(a => a.Id == id);
+            // בדיקה האם נמצא הסוכן
             if (agent == null)
             {
                 return NotFound();
@@ -95,6 +97,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
         // עדכון מיקום של סוכן
         async Task<ActionResult<Agent>> UpdateLocationMove(int id, Location location)
         {
+            // הבאת הסוכן עם המיקום
             var agent = await _context
                 .Agents.Include(a => a.Location)
                 .FirstOrDefaultAsync(a => a.Id == id);
@@ -102,8 +105,10 @@ namespace ManagementOfMossadAgentsAPI.Controllers
             {
                 return NotFound();
             }
+            // בדיקה האם הסוכן לא במשימה כרגע
             if (agent.Status != Enum.AgentStatus.Status.IN_ACTIVITY.ToString())
             {
+                // לבדוק שנתנו לו הצבה ראשונה
                 if (agent.Location == null)
                 {
                     return StatusCode(
@@ -113,6 +118,19 @@ namespace ManagementOfMossadAgentsAPI.Controllers
                 }
                 else
                 {
+                    // בדיקה האם הסוכן כבר בקצה
+                    if (
+                        agent.Location.X + location.X > 1000
+                        || agent.Location.Y + location.Y > 1000
+                    )
+                        return StatusCode(
+                            StatusCodes.Status400BadRequest,
+                            new
+                            {
+                                error = "It is not possible to move the agent in this direction",
+                                location = agent.Location
+                            }
+                        );
                     agent.Location.X += location.X;
                     agent.Location.Y += location.Y;
                 }
