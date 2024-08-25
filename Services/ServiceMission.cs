@@ -63,7 +63,7 @@ public class ServiceMission
         if (
             target.Location != null
             && agent.Location != null
-            && CalculateDistanceToTarget.IsInSameArea(target.Location, agent.Location)
+            && CalculateDistanceToTarget.IsInSamePlace(target.Location, agent.Location)
         )
         {
             mission.Status = MissionStatus.Status.ENDED.ToString();
@@ -72,33 +72,54 @@ public class ServiceMission
             _context.Targets.Update(target);
             agent.Status = AgentStatus.Status.DORMANT.ToString();
             _context.Agents.Update(agent);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
     }
 
     // פונקציה שמקבלת סוכן ומטרה ומוחקת את כל המשימות שהיו בהצעה לציוות אותו סוכן ומטרה
-    public async Task RemoveMission(Agent agent, Target target)
+    public async Task RemoveMission(Mission UpdatedMission)
     {
-        // var missions = _context.Missions.Include(a => a.Agent).Include(t => t.Target).ToList();
-        //
-        // if (missions != null)
-        // {
-        //     foreach (var mission in missions)
-        //     {
-        //         if (mission.Agent.Id == agent.Id && mission.Target.Id == target.Id)
-        //         {
-        //             _context.Missions.Remove(mission);
-        //         }
-        //     }
-        //     await _context.SaveChangesAsync();
-        // }
+        var missions = _context.Missions.Include(a => a.Agent).Include(t => t.Target).ToList();
 
-        List<Mission>? missions = _context
-            .Missions.Where(mission =>
-                mission.Agent.Id == agent.Id && mission.Target.Id == target.Id
-            )
-            .ToList();
-        _context.Missions.RemoveRange(missions);
+        if (missions != null)
+        {
+            foreach (var mission in missions)
+            {
+                if (mission.Target.Id == UpdatedMission.Target.Id)
+                {
+                    if (mission == UpdatedMission)
+                    {
+                        _context.Missions.Update(mission);
+                        continue;
+                    }
+                    _context.Missions.Remove(mission);
+                }
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        //List<Mission>? missions = _context
+        //    .Missions.Where(mission =>
+        //        mission.Agent.Id == agent.Id && mission.Target.Id == target.Id
+        //    )
+        //    .ToList();
+        //_context.Missions.RemoveRange(missions);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task MoveMissionsToTarget()
+    {
+        var missions = await _context
+            .Missions.Include(m => m.Target)
+            .ThenInclude(t => t.Location)
+            .Include(m => m.Agent)
+            .ThenInclude(a => a.Location)
+            .Where(m => m.Status == Enum.MissionStatus.Status.ASSIGNED.ToString())
+            .ToListAsync();
+        foreach (var mission in missions)
+        {
+            await MoveMission(mission.Target, mission.Agent);
+            await IsInSameArea(mission);
+        }
     }
 }

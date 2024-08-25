@@ -20,7 +20,7 @@ public class MissionsController : ControllerBase
         _serviceMission = new ServiceMission(_context);
     }
 
-    // פונקציה שמחזירה את כל המשימות הפעילות
+    // פונקציה שמחזירה את כל המשימות
     // GET: Missions
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Mission>>> GetMissions()
@@ -69,60 +69,15 @@ public class MissionsController : ControllerBase
         agent.Status = AgentStatus.Status.IN_ACTIVITY.ToString();
         await _context.SaveChangesAsync();
 
-        await _serviceMission.RemoveMission(agent, target);
+        await _serviceMission.RemoveMission(mission);
         return StatusCode(201, mission);
     }
 
-    //  // PUT: Missions/Update
-    //  // שרת סימולציה
-    // [HttpPut("Update")]
-    // public async Task<IActionResult> PutMission(int id, Mission mission)
-    // {
-    //     if (id != mission.Id) return BadRequest();
-    //
-    //     _context.Entry(mission).State = EntityState.Modified;
-    //
-    //     try
-    //     {
-    //         await _context.SaveChangesAsync();
-    //     }
-    //     catch (DbUpdateConcurrencyException)
-    //     {
-    //         if (!MissionExists(id))
-    //             return NotFound();
-    //         throw;
-    //     }
-    //
-    //     return NoContent();
-    // }
-
-    // POST: api/Missions
-    // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-    [HttpPost]
-    public async Task<ActionResult<Mission>> PostMission(Mission mission)
+    // POST: Missions/Update
+    // שרת סימולציה
+    [HttpPost("Update")]
+    public async Task PutMission()
     {
-        _context.Missions.Add(mission);
-        await _context.SaveChangesAsync();
-
-        return CreatedAtAction("GetMission", new { id = mission.Id }, mission);
-    }
-
-    // DELETE: api/Missions/5
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> DeleteMission(int id)
-    {
-        var mission = await _context.Missions.FindAsync(id);
-        if (mission == null)
-            return NotFound();
-
-        _context.Missions.Remove(mission);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
-
-    private bool MissionExists(int id)
-    {
-        return _context.Missions.Any(e => e.Id == id);
+        await _serviceMission.MoveMissionsToTarget();
     }
 }

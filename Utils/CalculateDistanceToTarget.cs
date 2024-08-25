@@ -14,7 +14,7 @@ public class CalculateDistanceToTarget
     }
 
     // פונקציה שבודקת האם הסוכן והמטרה באותו משבצת
-    public static bool IsInSameArea(Location locationOne, Location locationTwo)
+    public static bool IsInSamePlace(Location locationOne, Location locationTwo)
     {
         if (locationOne.X == locationTwo.X && locationOne.Y == locationTwo.Y)
             return true;
@@ -24,6 +24,9 @@ public class CalculateDistanceToTarget
     // פונקציה שבודקת האם הסוכן או המטרה כבר נמצאים בקצה
     public static bool IfMoveOutOfRange(Location Location, Location move)
     {
-        return Location.X + move.X > 1000 || Location.Y + move.Y > 1000;
+        return Location.X + move.X > 1000
+            || Location.Y + move.Y > 1000
+            || Location.X + move.X < 0
+            || Location.Y + move.Y < 0;
     }
 }
