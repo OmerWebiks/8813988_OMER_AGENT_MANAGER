@@ -3,6 +3,7 @@ using ManagementOfMossadAgentsAPI.Enum;
 using ManagementOfMossadAgentsAPI.Models;
 using ManagementOfMossadAgentsAPI.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 
 namespace ManagementOfMossadAgentsAPI.Services;
 
@@ -40,7 +41,7 @@ public class ServiceMission
     {
         if (target != null && agent != null)
         {
-            var distance = CalculateDistanceToTarget.Distance(target, agent);
+            var distance = GeneralFunctions.Distance(target.Location, agent.Location);
 
             if (distance <= 200)
                 return true;
@@ -49,6 +50,19 @@ public class ServiceMission
         }
 
         return false;
+    }
+
+    // פונקציה שבודקת האם היה כבר ציוות למשימה הזאת או שהמשימה הזאת כבר נגמרה
+    public async Task<bool> CheckMissionIsEndedOrAssigned(Mission mission)
+    {
+        if (
+            mission.Status == Enum.MissionStatus.Status.ENDED.ToString()
+            || mission.Status == Enum.MissionStatus.Status.ASSIGNED.ToString()
+        )
+        {
+            return false;
+        }
+        return true;
     }
 
     // בדיקה האם הסוכן והמטרה באותו משבצת
@@ -63,7 +77,7 @@ public class ServiceMission
         if (
             target.Location != null
             && agent.Location != null
-            && CalculateDistanceToTarget.IsInSamePlace(target.Location, agent.Location)
+            && GeneralFunctions.IsInSamePlace(target.Location, agent.Location)
         )
         {
             mission.Status = MissionStatus.Status.ENDED.ToString();
@@ -71,7 +85,10 @@ public class ServiceMission
             target.Status = TargetStatus.Status.DEAD.ToString();
             _context.Targets.Update(target);
             agent.Status = AgentStatus.Status.DORMANT.ToString();
+            agent.CountLiquidations += 1;
+            //TimeSpan timeSpan = DateTime.Now - mission.ExecutionTime;
             _context.Agents.Update(agent);
+
             await _context.SaveChangesAsync();
         }
     }

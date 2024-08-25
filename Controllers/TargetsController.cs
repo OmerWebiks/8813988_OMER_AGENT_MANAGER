@@ -29,9 +29,27 @@ namespace ManagementOfMossadAgentsAPI.Controllers
         // קבלת רשימה של כל המטרות
         // GET: api/Targets
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Target>>> GetTargets()
+        public async Task<ActionResult<IEnumerable<TargetView>>> GetTargets()
         {
-            return await _context.Targets.Include(t => t.Location).ToListAsync();
+            var targets = await _context.Targets.Include(t => t.Location).ToListAsync();
+            List<TargetView> targetView = new List<TargetView>();
+            foreach (var target in targets)
+            {
+                targetView.Add(
+                    new TargetView
+                    {
+                        Id = target.Id,
+                        Name = target.Name,
+                        Position = target.Position,
+                        Status = target.Status,
+                        X = target.Location.X,
+                        Y = target.Location.Y,
+                        PhotoUrl = target.PhotoUrl
+                    }
+                );
+            }
+
+            return Ok(targetView);
         }
 
         // יצירת מטרה חדשה
@@ -118,7 +136,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
                 );
             }
             // בדיקה האם המטרה כבר בקצה
-            if (CalculateDistanceToTarget.IfMoveOutOfRange(target.Location, location))
+            if (GeneralFunctions.IfMoveOutOfRange(target.Location, location))
                 return StatusCode(
                     StatusCodes.Status400BadRequest,
                     new

@@ -118,7 +118,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
                 );
             }
             // בדיקה האם הסוכן כבר בקצה
-            if (CalculateDistanceToTarget.IfMoveOutOfRange(agent.Location, location))
+            if (GeneralFunctions.IfMoveOutOfRange(agent.Location, location))
                 return StatusCode(
                     400,
                     new

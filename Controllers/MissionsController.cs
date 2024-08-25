@@ -64,8 +64,13 @@ public class MissionsController : ControllerBase
             await _context.SaveChangesAsync();
             return StatusCode(400, "The target is not near");
         }
+        if (!await _serviceMission.CheckMissionIsEndedOrAssigned(mission))
+        {
+            return StatusCode(400, "The mission is ended or assigned");
+        }
 
         mission.Status = MissionStatus.Status.ASSIGNED.ToString();
+        //mission.ExecutionTime = TimeSpan
         agent.Status = AgentStatus.Status.IN_ACTIVITY.ToString();
         await _context.SaveChangesAsync();
 

@@ -2,14 +2,14 @@
 
 namespace ManagementOfMossadAgentsAPI.Utils;
 
-public class CalculateDistanceToTarget
+public class GeneralFunctions
 {
     // פונקציה שבודקת את המרחק בין סוכן למטרה
-    public static double Distance(Target target, Agent agent)
+    public static double Distance(Location locationTarget, Location locationAgent)
     {
         return Math.Sqrt(
-            Math.Pow(target.Location.X - agent.Location.X, 2)
-                + Math.Pow(target.Location.Y - agent.Location.Y, 2)
+            Math.Pow(locationTarget.X - locationAgent.X, 2)
+                + Math.Pow(locationTarget.Y - locationAgent.Y, 2)
         );
     }
 
@@ -28,5 +28,12 @@ public class CalculateDistanceToTarget
             || Location.Y + move.Y > 1000
             || Location.X + move.X < 0
             || Location.Y + move.Y < 0;
+    }
+
+    // פונקציה לבדיקה כמה זמן נשאר למשימה
+    public async Task<double> TimeLeft(Location locationAgent, Location locationTarget)
+    {
+        double distance = Distance(locationTarget, locationAgent);
+        return distance / 5;
     }
 }

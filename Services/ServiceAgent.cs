@@ -9,6 +9,7 @@ namespace ManagementOfMossadAgentsAPI.Services;
 public class ServiceAgent
 {
     private readonly ManagementOfMossadAgentsDbContext _context;
+    private readonly GeneralFunctions _generalFunctions = new GeneralFunctions();
 
     public ServiceAgent(ManagementOfMossadAgentsDbContext context)
     {
@@ -29,7 +30,7 @@ public class ServiceAgent
             if (target.Status == TargetStatus.Status.LIVE.ToString() && target.Location != null)
             {
                 // בדיקה של המרחק בין הסוכן למטרה
-                var distance = CalculateDistanceToTarget.Distance(target, agent);
+                var distance = GeneralFunctions.Distance(target.Location, agent.Location);
 
                 // בדיקה האם המרחק בין הסוכן למטרה פחות מ 200
                 if (distance <= 200)
@@ -55,7 +56,11 @@ public class ServiceAgent
             else
             {
                 // אם יש הצעה של משימה כבר לעדכן אותה להצעה החדשה
-                mission.Target = thisTarget;
+                //mission.Target = thisTarget;
+                //mission.TimeLeft = await _generalFunctions.TimeLeft(
+                //    mission.Agent.Location,
+                //    mission.Target.Location
+                //);
                 _context.Missions.Update(mission);
             }
 
@@ -77,7 +82,10 @@ public class ServiceAgent
         {
             foreach (var mission in missions)
             {
-                double distance = CalculateDistanceToTarget.Distance(mission.Target, mission.Agent);
+                double distance = GeneralFunctions.Distance(
+                    mission.Target.Location,
+                    mission.Agent.Location
+                );
                 if (distance > 200)
                 {
                     _context.Missions.Remove(mission);
