@@ -26,9 +26,9 @@ namespace ManagementOfMossadAgentsAPI.Del
             {
                 Console.WriteLine("DbContext:ManagementOfMossadAgentsDbContext: true");
 
-                SeedAgent();
-                SeedTarget();
-                SeedMission();
+                //SeedAgent();
+                //SeedTarget();
+                //SeedMission();
             }
         }
 

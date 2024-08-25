@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ManagementOfMossadAgentsAPI.Del;
 using ManagementOfMossadAgentsAPI.Models;
 using ManagementOfMossadAgentsAPI.Services;
+using ManagementOfMossadAgentsAPI.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,6 +18,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
     {
         private readonly ManagementOfMossadAgentsDbContext _context;
         private readonly ServiceAgent _serviceAgent;
+        private readonly ServiceMove _serviceMove = new ServiceMove();
 
         public AgentsController(ManagementOfMossadAgentsDbContext context)
         {
@@ -63,20 +65,16 @@ namespace ManagementOfMossadAgentsAPI.Controllers
             {
                 return NotFound();
             }
-            if (agent.Location == null)
-            {
-                agent.Location = location;
-                _context.Locations.Add(location);
-                _context.SaveChanges();
-                await _serviceAgent.MissionCheckAgent(agent);
-            }
-            else
-            {
+            if (agent.Location != null)
                 return StatusCode(
                     StatusCodes.Status400BadRequest,
                     new { error = "Agent already has a location." }
                 );
-            }
+
+            agent.Location = location;
+            _context.Locations.Add(location);
+            _context.SaveChanges();
+            await _serviceAgent.MissionCheckAgent(agent);
 
             return agent;
         }
@@ -86,8 +84,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
         [HttpPut("{id}/move")]
         public async Task<ActionResult<Agent>> PutAgent(int id, ServiceMove location)
         {
-            ServiceMove serviceMove = new ServiceMove();
-            var dictionaryMove = serviceMove.MoveDictionary[location.Location];
+            var dictionaryMove = _serviceMove.MoveDictionary[location.Location];
 
             Location loc = new Location(dictionaryMove[0], dictionaryMove[1]);
             // שליחה לפונקציה שמעדכנת את המיקום
@@ -102,97 +99,40 @@ namespace ManagementOfMossadAgentsAPI.Controllers
                 .Agents.Include(a => a.Location)
                 .FirstOrDefaultAsync(a => a.Id == id);
             if (agent == null)
-            {
                 return NotFound();
-            }
             // בדיקה האם הסוכן לא במשימה כרגע
-            if (agent.Status != Enum.AgentStatus.Status.IN_ACTIVITY.ToString())
+            if (agent.Status == Enum.AgentStatus.Status.IN_ACTIVITY.ToString())
             {
-                // לבדוק שנתנו לו הצבה ראשונה
-                if (agent.Location == null)
-                {
-                    return StatusCode(
-                        StatusCodes.Status400BadRequest,
-                        new { error = "Agent does not have a location" }
-                    );
-                }
-                else
-                {
-                    // בדיקה האם הסוכן כבר בקצה
-                    if (
-                        agent.Location.X + location.X > 1000
-                        || agent.Location.Y + location.Y > 1000
-                    )
-                        return StatusCode(
-                            StatusCodes.Status400BadRequest,
-                            new
-                            {
-                                error = "It is not possible to move the agent in this direction",
-                                location = agent.Location
-                            }
-                        );
-                    agent.Location.X += location.X;
-                    agent.Location.Y += location.Y;
-                }
-                _context.SaveChanges();
-
-                return agent;
+                return StatusCode(
+                    StatusCodes.Status400BadRequest,
+                    new { error = "Agent is in activity" }
+                );
             }
-            return StatusCode(
-                StatusCodes.Status400BadRequest,
-                new { error = "Agent is in activity" }
-            );
-        }
 
-        //// PUT: api/Agents/5
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutAgent(Guid? id, Agent agent)
-        //{
-        //    if (id != agent.Id)
-        //    {
-        //        return BadRequest();
-        //    }
+            // לבדוק שנתנו לו הצבה ראשונה
+            if (agent.Location == null)
+            {
+                return StatusCode(
+                    StatusCodes.Status400BadRequest,
+                    new { error = "Agent does not have a location" }
+                );
+            }
+            // בדיקה האם הסוכן כבר בקצה
+            if (CalculateDistanceToTarget.IfMoveOutOfRange(agent.Location, location))
+                return StatusCode(
+                    400,
+                    new
+                    {
+                        error = "It is not possible to move the agent in this direction",
+                        location = agent.Location
+                    }
+                );
+            agent.Location.X += location.X;
+            agent.Location.Y += location.Y;
 
-        //    _context.Entry(agent).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!AgentExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
-
-        //// DELETE: api/Agents/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteAgent(Guid? id)
-        //{
-        //    var agent = await _context.Agents.FindAsync(id);
-        //    if (agent == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Agents.Remove(agent);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-        private bool AgentExists(int id)
-        {
-            return _context.Agents.Any(e => e.Id == id);
+            _context.SaveChanges();
+            await _serviceAgent.CheckMoveAgent(agent);
+            return agent;
         }
     }
 }

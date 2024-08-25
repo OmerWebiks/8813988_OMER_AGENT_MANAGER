@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ManagementOfMossadAgentsAPI.Del;
 using ManagementOfMossadAgentsAPI.Models;
 using ManagementOfMossadAgentsAPI.Services;
+using ManagementOfMossadAgentsAPI.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,10 +17,13 @@ namespace ManagementOfMossadAgentsAPI.Controllers
     public class TargetsController : ControllerBase
     {
         private readonly ManagementOfMossadAgentsDbContext _context;
+        private readonly ServiceMove _serviceMove = new ServiceMove();
+        private readonly ServiceTarget _serviceTarget;
 
         public TargetsController(ManagementOfMossadAgentsDbContext context)
         {
             _context = context;
+            _serviceTarget = new ServiceTarget(_context);
         }
 
         // קבלת רשימה של כל המטרות
@@ -27,7 +31,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Target>>> GetTargets()
         {
-            return await _context.Targets.ToListAsync();
+            return await _context.Targets.Include(t => t.Location).ToListAsync();
         }
 
         // יצירת מטרה חדשה
@@ -81,8 +85,7 @@ namespace ManagementOfMossadAgentsAPI.Controllers
         [HttpPut("{id}/move")]
         public async Task<ActionResult<Target>> PutAgent(int id, ServiceMove location)
         {
-            ServiceMove serviceMove = new ServiceMove();
-            var dictionaryMove = serviceMove.MoveDictionary[location.Location];
+            var dictionaryMove = _serviceMove.MoveDictionary[location.Location];
 
             Location locationDict = new Location(dictionaryMove[0], dictionaryMove[1]);
             // שליחה לפונקציה שמעדכנת את המיקום
@@ -102,39 +105,34 @@ namespace ManagementOfMossadAgentsAPI.Controllers
                 return NotFound();
             }
             // בדיקה שהמטרה חייה
-            if (target.Status == Enum.TargetStatus.Status.LIVE.ToString())
+            if (target.Status != Enum.TargetStatus.Status.LIVE.ToString())
             {
-                // בדיקה שיש כבר הצבה של המטרה
-                if (target.Location == null)
-                {
-                    return StatusCode(
-                        StatusCodes.Status400BadRequest,
-                        new { error = "Target does not have a location" }
-                    );
-                }
-                else
-                {
-                    // בדיקה האם המטרה כבר בקצה
-                    if (
-                        target.Location.X + location.X > 1000
-                        || target.Location.Y + location.Y > 1000
-                    )
-                        return StatusCode(
-                            StatusCodes.Status400BadRequest,
-                            new
-                            {
-                                error = "It is not possible to move the target in this direction",
-                                location = target.Location
-                            }
-                        );
-                    target.Location.X += location.X;
-                    target.Location.Y += location.Y;
-                }
-                _context.SaveChanges();
-
-                return target;
+                return StatusCode(StatusCodes.Status400BadRequest, new { error = "Target is did" });
             }
-            return StatusCode(StatusCodes.Status400BadRequest, new { error = "Target is did" });
+            // בדיקה שיש כבר הצבה של המטרה
+            if (target.Location == null)
+            {
+                return StatusCode(
+                    StatusCodes.Status400BadRequest,
+                    new { error = "Target does not have a location" }
+                );
+            }
+            // בדיקה האם המטרה כבר בקצה
+            if (CalculateDistanceToTarget.IfMoveOutOfRange(target.Location, location))
+                return StatusCode(
+                    StatusCodes.Status400BadRequest,
+                    new
+                    {
+                        error = "It is not possible to move the target in this direction",
+                        location = target.Location
+                    }
+                );
+            target.Location.X += location.X;
+            target.Location.Y += location.Y;
+
+            _context.SaveChanges();
+            await _serviceTarget.CheckMissionsTarget(target);
+            return target;
         }
     }
 }

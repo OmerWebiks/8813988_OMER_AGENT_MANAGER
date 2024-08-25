@@ -12,7 +12,7 @@ namespace ManagementOfMossadAgentsAPI.Models
         public int X { get; set; } = 0;
         public int Y { get; set; } = 0;
         public string? Status { get; set; }
-        public string? PhotoUrl { get; set; }
+        public string PhotoUrl { get; set; }
 
         public Target()
         {

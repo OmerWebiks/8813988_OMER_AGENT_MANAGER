@@ -5,7 +5,7 @@
         public enum Status
         {
             PROPOSAL,
-            MITZVAH_FOR_THE_TASK,
+            ASSIGNED,
             ENDED
         }
     }
