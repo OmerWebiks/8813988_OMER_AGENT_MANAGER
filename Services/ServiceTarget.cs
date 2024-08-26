@@ -28,7 +28,7 @@ public class ServiceTarget
 
         foreach (var agent in agents)
             // בדיקה האם הסוכן רדום והוא הוצב במיקום
-            if (agent.Status == AgentStatus.Status.IN_ACTIVITY.ToString() && agent.Location != null)
+            if (agent.Status == AgentStatus.Status.DORMANT.ToString() && agent.Location != null)
             {
                 // בדיקה של המרחק בין המטרה לסוכן
                 var distance = GeneralFunctions.Distance(target.Location, agent.Location);
@@ -84,5 +84,28 @@ public class ServiceTarget
             await _context.SaveChangesAsync();
             await MissionCheckTarget(target);
         }
+    }
+
+    // פונקציה שמביאה את כל המטרות
+    public async Task<List<TargetView>> GetTargets()
+    {
+        var targets = await _context.Targets.Include(t => t.Location).ToListAsync();
+        List<TargetView> targetView = new List<TargetView>();
+        foreach (var target in targets)
+        {
+            targetView.Add(
+                new TargetView
+                {
+                    Id = target.Id,
+                    Name = target.Name,
+                    Position = target.Position,
+                    Status = target.Status,
+                    X = target.Location.X,
+                    Y = target.Location.Y,
+                    PhotoUrl = target.PhotoUrl
+                }
+            );
+        }
+        return targetView;
     }
 }

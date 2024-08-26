@@ -31,23 +31,7 @@ namespace ManagementOfMossadAgentsAPI.api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TargetView>>> GetTargets()
         {
-            var targets = await _context.Targets.Include(t => t.Location).ToListAsync();
-            List<TargetView> targetView = new List<TargetView>();
-            foreach (var target in targets)
-            {
-                targetView.Add(
-                    new TargetView
-                    {
-                        Id = target.Id,
-                        Name = target.Name,
-                        Position = target.Position,
-                        Status = target.Status,
-                        X = target.Location.X,
-                        Y = target.Location.Y,
-                        PhotoUrl = target.PhotoUrl
-                    }
-                );
-            }
+            var targetView = await _serviceTarget.GetTargets();
 
             return Ok(targetView);
         }
@@ -94,7 +78,7 @@ namespace ManagementOfMossadAgentsAPI.api.Controllers
                     new { error = "Agent already has a location." }
                 );
             }
-
+            await _serviceTarget.MissionCheckTarget(target);
             return target;
         }
 
