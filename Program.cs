@@ -1,5 +1,5 @@
-using ManagementOfMossadAgentsAPI.Del;
-using ManagementOfMossadAgentsAPI.MiddelWares.Global;
+using ManagementOfMossadAgentsAPI.api.Del;
+using ManagementOfMossadAgentsAPI.api.MiddelWares.Global;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

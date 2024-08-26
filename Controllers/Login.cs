@@ -2,13 +2,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using ManagementOfMossadAgentsAPI.Del;
+using ManagementOfMossadAgentsAPI.api.Del;
 using ManagementOfMossadAgentsAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ManagementOfMossadAgentsAPI.Controllers
+namespace ManagementOfMossadAgentsAPI.api.Controllers
 {
     [Route("[controller]")]
     [ApiController]

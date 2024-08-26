@@ -1,41 +1,29 @@
-﻿using ManagementOfMossadAgentsAPI.Del;
+﻿using ManagementOfMossadAgentsAPI.api.Del;
+using ManagementOfMossadAgentsAPI.api.Services;
 using ManagementOfMossadAgentsAPI.Models;
-using ManagementOfMossadAgentsAPI.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ManagementOfMossadAgentsAPI.Controllers
+namespace ManagementOfMossadAgentsAPI.api.Controllers
 {
     [Route("[controller]")]
     [ApiController]
     public class GeneralViewController : ControllerBase
     {
         private readonly ManagementOfMossadAgentsDbContext _context;
+        ServiceGeneralView _serviceGeneralView;
 
         public GeneralViewController(ManagementOfMossadAgentsDbContext context)
         {
             _context = context;
+            _serviceGeneralView = new ServiceGeneralView(_context);
         }
 
-        [HttpGet("GetGeneral")]
+        [HttpGet]
         public async Task<ActionResult<GeneralView>> GetGeneralView()
         {
-            GeneralView generalView = new GeneralView();
-            generalView.CountAgent = _context.Agents.Count();
-            generalView.CountTarget = _context.Targets.Count();
-            generalView.CountMission = _context.Missions.Count();
-            generalView.AgentActive = _context
-                .Agents.Where(a => a.Status == Enum.AgentStatus.Status.IN_ACTIVITY.ToString())
-                .Count();
-            generalView.TargetLive = _context
-                .Targets.Where(t => t.Status == Enum.TargetStatus.Status.LIVE.ToString())
-                .Count();
-            generalView.MissionActive = _context
-                .Missions.Where(m => m.Status == Enum.MissionStatus.Status.ASSIGNED.ToString())
-                .Count();
-            generalView.RadioBetweenAgentToTarget =
-                generalView.CountAgent / generalView.CountTarget;
-            generalView.RadioBetweenAgentToMission = 50;
+            var generalView = await _serviceGeneralView.GetGeneralView();
+
             return Ok(generalView);
         }
     }

@@ -2,7 +2,7 @@
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ManagementOfMossadAgentsAPI.MiddelWares.Global
+namespace ManagementOfMossadAgentsAPI.api.MiddelWares.Global
 {
     public class JwtValidationMiddleware
     {
@@ -10,14 +10,11 @@ namespace ManagementOfMossadAgentsAPI.MiddelWares.Global
 
         public JwtValidationMiddleware(RequestDelegate next)
         {
-            this._next = next;
+            _next = next;
         }
 
         public async Task Invoke(HttpContext context)
         {
-            // Headers {Authorization: Bearer ey37729ythkwaw4i}
-            // Bearer ey37729ythkwaw4i
-            // [Bearer,ey37729ythkwaw4i]
             try
             {
                 string? BearerToken = context.Request.Headers["Authorization"].FirstOrDefault();

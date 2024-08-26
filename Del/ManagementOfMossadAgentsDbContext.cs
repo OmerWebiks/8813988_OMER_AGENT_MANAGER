@@ -1,8 +1,9 @@
-﻿using ManagementOfMossadAgentsAPI.Models;
+﻿using ManagementOfMossadAgentsAPI.api.Enum;
+using ManagementOfMossadAgentsAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace ManagementOfMossadAgentsAPI.Del
+namespace ManagementOfMossadAgentsAPI.api.Del
 {
     public class ManagementOfMossadAgentsDbContext : DbContext
     {
@@ -40,7 +41,7 @@ namespace ManagementOfMossadAgentsAPI.Del
                 {
                     Nickname = "Zara",
                     Location = new Location(50, 40),
-                    Status = Enum.AgentStatus.Status.DORMANT.ToString(),
+                    Status = AgentStatus.Status.DORMANT.ToString(),
                     PhotoUrl = "fdndfdfn"
                 }
             );

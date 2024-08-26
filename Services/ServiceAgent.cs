@@ -1,10 +1,10 @@
-﻿using ManagementOfMossadAgentsAPI.Del;
-using ManagementOfMossadAgentsAPI.Enum;
+﻿using ManagementOfMossadAgentsAPI.api.Del;
+using ManagementOfMossadAgentsAPI.api.Enum;
+using ManagementOfMossadAgentsAPI.api.Utils;
 using ManagementOfMossadAgentsAPI.Models;
-using ManagementOfMossadAgentsAPI.Utils;
 using Microsoft.EntityFrameworkCore;
 
-namespace ManagementOfMossadAgentsAPI.Services;
+namespace ManagementOfMossadAgentsAPI.api.Services;
 
 public class ServiceAgent
 {
@@ -13,7 +13,7 @@ public class ServiceAgent
 
     public ServiceAgent(ManagementOfMossadAgentsDbContext context)
     {
-        this._context = context;
+        _context = context;
     }
 
     // פונקציה שעוברת על כל המטרות עבור סוכן אחד

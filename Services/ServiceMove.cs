@@ -1,6 +1,6 @@
 ﻿using ManagementOfMossadAgentsAPI.Models;
 
-namespace ManagementOfMossadAgentsAPI.Services
+namespace ManagementOfMossadAgentsAPI.api.Services
 {
     public class ServiceMove
     {

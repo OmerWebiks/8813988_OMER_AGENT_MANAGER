@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ManagementOfMossadAgentsAPI.api.Enum;
 
 namespace ManagementOfMossadAgentsAPI.Models
 {
@@ -17,7 +18,7 @@ namespace ManagementOfMossadAgentsAPI.Models
 
         public Mission()
         {
-            Status = Enum.MissionStatus.Status.PROPOSAL.ToString();
+            Status = MissionStatus.Status.PROPOSAL.ToString();
         }
     }
 }

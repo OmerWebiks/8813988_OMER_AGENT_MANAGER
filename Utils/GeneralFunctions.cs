@@ -1,6 +1,6 @@
 ﻿using ManagementOfMossadAgentsAPI.Models;
 
-namespace ManagementOfMossadAgentsAPI.Utils;
+namespace ManagementOfMossadAgentsAPI.api.Utils;
 
 public class GeneralFunctions
 {

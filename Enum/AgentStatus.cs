@@ -1,4 +1,4 @@
-﻿namespace ManagementOfMossadAgentsAPI.Enum
+﻿namespace ManagementOfMossadAgentsAPI.api.Enum
 {
     public class AgentStatus
     {

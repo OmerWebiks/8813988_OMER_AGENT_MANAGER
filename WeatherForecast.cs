@@ -1,4 +1,4 @@
-namespace ManagementOfMossadAgentsAPI
+namespace ManagementOfMossadAgentsAPI.api
 {
     public class WeatherForecast
     {

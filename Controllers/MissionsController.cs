@@ -1,12 +1,12 @@
-﻿using ManagementOfMossadAgentsAPI.Del;
-using ManagementOfMossadAgentsAPI.Enum;
+﻿using ManagementOfMossadAgentsAPI.api.Del;
+using ManagementOfMossadAgentsAPI.api.Enum;
+using ManagementOfMossadAgentsAPI.api.Services;
+using ManagementOfMossadAgentsAPI.api.Utils;
 using ManagementOfMossadAgentsAPI.Models;
-using ManagementOfMossadAgentsAPI.Services;
-using ManagementOfMossadAgentsAPI.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace ManagementOfMossadAgentsAPI.Controllers;
+namespace ManagementOfMossadAgentsAPI.api.Controllers;
 
 [Route("[controller]")]
 [ApiController]

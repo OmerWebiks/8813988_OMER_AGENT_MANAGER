@@ -1,11 +1,11 @@
-﻿using ManagementOfMossadAgentsAPI.Del;
-using ManagementOfMossadAgentsAPI.Enum;
+﻿using ManagementOfMossadAgentsAPI.api.Del;
+using ManagementOfMossadAgentsAPI.api.Enum;
+using ManagementOfMossadAgentsAPI.api.Utils;
 using ManagementOfMossadAgentsAPI.Models;
-using ManagementOfMossadAgentsAPI.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 
-namespace ManagementOfMossadAgentsAPI.Services;
+namespace ManagementOfMossadAgentsAPI.api.Services;
 
 public class ServiceMission
 {
@@ -56,8 +56,8 @@ public class ServiceMission
     public async Task<bool> CheckMissionIsEndedOrAssigned(Mission mission)
     {
         if (
-            mission.Status == Enum.MissionStatus.Status.ENDED.ToString()
-            || mission.Status == Enum.MissionStatus.Status.ASSIGNED.ToString()
+            mission.Status == MissionStatus.Status.ENDED.ToString()
+            || mission.Status == MissionStatus.Status.ASSIGNED.ToString()
         )
         {
             return false;
@@ -131,7 +131,7 @@ public class ServiceMission
             .ThenInclude(t => t.Location)
             .Include(m => m.Agent)
             .ThenInclude(a => a.Location)
-            .Where(m => m.Status == Enum.MissionStatus.Status.ASSIGNED.ToString())
+            .Where(m => m.Status == MissionStatus.Status.ASSIGNED.ToString())
             .ToListAsync();
         foreach (var mission in missions)
         {
@@ -148,7 +148,6 @@ public class ServiceMission
             .ThenInclude(l => l.Location)
             .Include(t => t.Target)
             .ThenInclude(l => l.Location)
-            .Where(m => m.Status == MissionStatus.Status.PROPOSAL.ToString())
             .ToListAsync();
 
         List<TaskManagementForView> missionListForView = new List<TaskManagementForView>();
@@ -171,6 +170,7 @@ public class ServiceMission
                         mission.Target.Location,
                         mission.Agent.Location
                     ),
+                    Status = mission.Status,
                 }
             );
         }

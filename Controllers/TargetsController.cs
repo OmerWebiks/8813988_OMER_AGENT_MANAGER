@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ManagementOfMossadAgentsAPI.Del;
+using ManagementOfMossadAgentsAPI.api.Del;
+using ManagementOfMossadAgentsAPI.api.Services;
+using ManagementOfMossadAgentsAPI.api.Utils;
 using ManagementOfMossadAgentsAPI.Models;
-using ManagementOfMossadAgentsAPI.Services;
-using ManagementOfMossadAgentsAPI.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace ManagementOfMossadAgentsAPI.Controllers
+namespace ManagementOfMossadAgentsAPI.api.Controllers
 {
     [Route("[controller]")]
     [ApiController]

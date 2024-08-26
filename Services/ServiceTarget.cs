@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
-using ManagementOfMossadAgentsAPI.Del;
-using ManagementOfMossadAgentsAPI.Enum;
+using ManagementOfMossadAgentsAPI.api.Del;
+using ManagementOfMossadAgentsAPI.api.Enum;
+using ManagementOfMossadAgentsAPI.api.Utils;
 using ManagementOfMossadAgentsAPI.Models;
-using ManagementOfMossadAgentsAPI.Utils;
 using Microsoft.EntityFrameworkCore;
 
-namespace ManagementOfMossadAgentsAPI.Services;
+namespace ManagementOfMossadAgentsAPI.api.Services;
 
 public class ServiceTarget
 {
