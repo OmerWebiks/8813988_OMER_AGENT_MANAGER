@@ -139,4 +139,41 @@ public class ServiceMission
             await IsInSameArea(mission);
         }
     }
+
+    // פונקציה שמביאה את כל המשימות לציוות בשביל ה Mvc
+    public async Task<List<TaskManagementForView>> GetMissionForView()
+    {
+        var missions = await _context
+            .Missions.Include(a => a.Agent)
+            .ThenInclude(l => l.Location)
+            .Include(t => t.Target)
+            .ThenInclude(l => l.Location)
+            .Where(m => m.Status == MissionStatus.Status.PROPOSAL.ToString())
+            .ToListAsync();
+
+        List<TaskManagementForView> missionListForView = new List<TaskManagementForView>();
+
+        foreach (var mission in missions)
+        {
+            missionListForView.Add(
+                new TaskManagementForView
+                {
+                    IdMission = mission.Id,
+                    AgentName = mission.Agent.Nickname,
+                    XAgent = mission.Agent.Location.X,
+                    YAgent = mission.Agent.Location.Y,
+                    TargetName = mission.Target.Name,
+                    XTarget = mission.Target.Location.X,
+                    YTarget = mission.Target.Location.Y,
+                    PositionTarget = mission.Target.Position,
+                    TimeLeft = mission.TimeLeft,
+                    Distance = GeneralFunctions.Distance(
+                        mission.Target.Location,
+                        mission.Agent.Location
+                    ),
+                }
+            );
+        }
+        return missionListForView;
+    }
 }

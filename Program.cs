@@ -1,4 +1,5 @@
 using ManagementOfMossadAgentsAPI.Del;
+using ManagementOfMossadAgentsAPI.MiddelWares.Global;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,6 +29,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseWhen(
+    context => !context.Request.Path.StartsWithSegments("/Login"),
+    appBuilder =>
+    {
+        appBuilder.UseMiddleware<JwtValidationMiddleware>();
+    }
+);
 
 app.UseAuthorization();
 

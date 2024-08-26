@@ -2,6 +2,7 @@
 using ManagementOfMossadAgentsAPI.Enum;
 using ManagementOfMossadAgentsAPI.Models;
 using ManagementOfMossadAgentsAPI.Services;
+using ManagementOfMossadAgentsAPI.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,12 +26,9 @@ public class MissionsController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Mission>>> GetMissions()
     {
-        return await _context
-            .Missions.Include(a => a.Agent)
-            .ThenInclude(l => l.Location)
-            .Include(t => t.Target)
-            .ThenInclude(l => l.Location)
-            .ToListAsync();
+        List<TaskManagementForView> MissionForView = await _serviceMission.GetMissionForView();
+
+        return Ok(MissionForView);
     }
 
     // פונקציה לצוות סוכן למשימה
