@@ -78,7 +78,7 @@ namespace ManagementOfMossadAgentsAPI.api.Controllers
                     new { error = "Agent already has a location." }
                 );
             }
-            await _serviceTarget.MissionCheckTarget(target);
+            await _serviceTarget.CheckMissionsTarget(target);
             return target;
         }
 

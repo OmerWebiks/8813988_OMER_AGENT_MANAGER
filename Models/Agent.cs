@@ -11,7 +11,7 @@ namespace ManagementOfMossadAgentsAPI.Models
         public Location? Location { get; set; }
         public string? Status { get; set; }
         public string PhotoUrl { get; set; }
-        public int? CountLiquidations { get; set; } = 0;
+        public int CountLiquidations { get; set; } = 0;
 
         public Agent()
         {

@@ -20,13 +20,11 @@ public class ServiceTarget
     // פונקציה שעוברת על כל הסוכנים עבור מטרה אחת
     public async Task MissionCheckTarget(Target target)
     {
-        double minDistance = 1000;
-        Agent thisAgent = null;
-
         // הבאת כל הסוכנים
         var agents = await _context.Agents.Include(t => t.Location).ToListAsync();
 
         foreach (var agent in agents)
+        {
             // בדיקה האם הסוכן רדום והוא הוצב במיקום
             if (agent.Status == AgentStatus.Status.DORMANT.ToString() && agent.Location != null)
             {
@@ -34,27 +32,24 @@ public class ServiceTarget
                 var distance = GeneralFunctions.Distance(target.Location, agent.Location);
                 // בדיקה האם המרחק בין הסוכן למטרה פחות מ 200
                 if (distance <= 200)
-                    if (distance <= minDistance)
+                {
+                    // בדיקה שהמשימה הזאת כבר לא קיימת
+                    Mission? mission = await _context.Missions.FirstOrDefaultAsync(p =>
+                        p.Target.Id == target.Id && p.Agent.Id == agent.Id
+                    );
+                    if (mission == null)
                     {
-                        minDistance = distance;
-                        thisAgent = agent;
+                        var newMission = new Mission
+                        {
+                            Target = target,
+                            Agent = agent,
+                            TimeLeft = distance / 5.0
+                        };
+                        await _context.Missions.AddAsync(newMission);
                     }
+                }
             }
-
-        // בדיקה האם נמצא סוכן שעומד בקרטריונים של ההצעות למשימה
-        if (thisAgent != null)
-        {
-            //double timeLeft = await _generalFunctions.TimeLeft(thisAgent.Location, target.Location);
-            // הוספת ההצעה
-            var newMission = new Mission
-            {
-                Target = target,
-                Agent = thisAgent,
-                //TimeLeft = timeLeft
-            };
-            _context.Missions.Add(newMission);
         }
-
         await _context.SaveChangesAsync();
     }
 
@@ -79,6 +74,10 @@ public class ServiceTarget
                 if (distance > 200)
                 {
                     _context.Missions.Remove(mission);
+                }
+                else
+                {
+                    mission.TimeLeft = distance / 5.0;
                 }
             }
             await _context.SaveChangesAsync();

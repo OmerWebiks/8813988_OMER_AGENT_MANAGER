@@ -9,7 +9,7 @@ namespace ManagementOfMossadAgentsAPI.Models
         public int Id { get; set; }
         public Agent Agent { get; set; }
         public Target Target { get; set; }
-        public double TimeLeft { get; set; }
+        public double TimeLeft { get; set; } = 0;
         public TimeSpan ExecutionTime { get; set; }
 
         //// מגדיר קבוע של סטטוס

@@ -83,4 +83,34 @@ public class MissionsController : ControllerBase
     {
         await _serviceMission.MoveMissionsToTarget();
     }
+
+    // הבאת משימה אחת בשביל התצוגה
+    [HttpGet("/GetOneMission/{id}")]
+    public async Task<MissionForView> GetOneMission(int id)
+    {
+        MissionForView missionForView = new MissionForView();
+        if (id != 0)
+        {
+            Mission? mission = await _context
+                .Missions.Include(a => a.Agent)
+                .ThenInclude(l => l.Location)
+                .Include(t => t.Target)
+                .ThenInclude(l => l.Location)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (mission != null)
+            {
+                missionForView.Id = id;
+                missionForView.Nickname = mission.Agent.Nickname;
+                missionForView.X = mission.Agent.Location.X;
+                missionForView.Y = mission.Agent.Location.Y;
+                missionForView.TargetName = mission.Target.Name;
+                missionForView.TargetX = mission.Target.Location.X;
+                missionForView.TargetY = mission.Target.Location.Y;
+                missionForView.TimeLeft = mission.TimeLeft;
+                missionForView.Status = mission.Status;
+            }
+        }
+
+        return missionForView;
+    }
 }

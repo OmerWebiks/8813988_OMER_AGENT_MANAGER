@@ -102,7 +102,10 @@ public class ServiceMission
         {
             foreach (var mission in missions)
             {
-                if (mission.Target.Id == UpdatedMission.Target.Id)
+                if (
+                    mission.Target.Id == UpdatedMission.Target.Id
+                    || mission.Agent.Id == UpdatedMission.Agent.Id
+                )
                 {
                     if (mission == UpdatedMission)
                     {
@@ -154,6 +157,10 @@ public class ServiceMission
 
         foreach (var mission in missions)
         {
+            double distance = GeneralFunctions.Distance(
+                mission.Target.Location,
+                mission.Agent.Location
+            );
             missionListForView.Add(
                 new TaskManagementForView
                 {
@@ -166,10 +173,7 @@ public class ServiceMission
                     YTarget = mission.Target.Location.Y,
                     PositionTarget = mission.Target.Position,
                     TimeLeft = mission.TimeLeft,
-                    Distance = GeneralFunctions.Distance(
-                        mission.Target.Location,
-                        mission.Agent.Location
-                    ),
+                    Distance = distance,
                     Status = mission.Status,
                 }
             );

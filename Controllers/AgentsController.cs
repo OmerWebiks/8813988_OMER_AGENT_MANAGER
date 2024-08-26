@@ -75,7 +75,7 @@ namespace ManagementOfMossadAgentsAPI.api.Controllers
             agent.Location = location;
             _context.Locations.Add(location);
             _context.SaveChanges();
-            await _serviceAgent.MissionCheckAgent(agent);
+            await _serviceAgent.CheckMoveAgent(agent);
 
             return agent;
         }
@@ -134,6 +134,15 @@ namespace ManagementOfMossadAgentsAPI.api.Controllers
             _context.SaveChanges();
             await _serviceAgent.CheckMoveAgent(agent);
             return agent;
+        }
+
+        // הבאת הסוכנים עבור התצוגה
+        [HttpGet("agentForView")]
+        public async Task<List<AgentForView>> GetAgentForView()
+        {
+            var agentsForView = await _serviceAgent.GetAgentForView();
+
+            return agentsForView;
         }
     }
 }

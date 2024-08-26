@@ -1,4 +1,5 @@
-﻿using ManagementOfMossadAgentsAPI.api.Del;
+﻿using System.Reflection;
+using ManagementOfMossadAgentsAPI.api.Del;
 using ManagementOfMossadAgentsAPI.api.Enum;
 using ManagementOfMossadAgentsAPI.api.Utils;
 using ManagementOfMossadAgentsAPI.Models;
@@ -19,13 +20,11 @@ public class ServiceAgent
     // פונקציה שעוברת על כל המטרות עבור סוכן אחד
     public async Task MissionCheckAgent(Agent agent)
     {
-        double minDistance = 1000;
-        Target thisTarget = null;
-
         // הבאת כל המטרות
         var targets = await _context.Targets.Include(t => t.Location).ToListAsync();
 
         foreach (var target in targets)
+        {
             // בדיקה האם המטרה חייה
             if (target.Status == TargetStatus.Status.LIVE.ToString() && target.Location != null)
             {
@@ -34,36 +33,23 @@ public class ServiceAgent
 
                 // בדיקה האם המרחק בין הסוכן למטרה פחות מ 200
                 if (distance <= 200)
-                    if (distance <= minDistance)
+                {
+                    // בדיקה שהמשימה הזאת כבר לא קיימת
+                    Mission? mission = await _context.Missions.FirstOrDefaultAsync(p =>
+                        p.Target.Id == target.Id && p.Agent.Id == agent.Id
+                    );
+                    if (mission == null)
                     {
-                        minDistance = distance;
-                        thisTarget = target;
+                        var newMission = new Mission
+                        {
+                            Target = target,
+                            Agent = agent,
+                            TimeLeft = distance / 5.0
+                        };
+                        await _context.Missions.AddAsync(newMission);
                     }
+                }
             }
-
-        // בדיקה האם נמצאה מטרה שעומדת בקרטריונים של ההצעות למשימה
-        if (thisTarget != null)
-        {
-            // בדיקה האם יש כבר הצעה למשימה לאותו סוכן וא"כ להביא אותה
-            var mission = _context.Missions.FirstOrDefault(mission => mission.Agent.Id == agent.Id);
-
-            if (mission == null)
-            {
-                // הגדרה שאם אין הצעה למשימה להגדיר את ההצעה הנוכחית
-                mission = new Mission { Agent = agent, Target = thisTarget };
-                _context.Missions.Add(mission);
-            }
-            else
-            {
-                // אם יש הצעה של משימה כבר לעדכן אותה להצעה החדשה
-                //mission.Target = thisTarget;
-                //mission.TimeLeft = await _generalFunctions.TimeLeft(
-                //    mission.Agent.Location,
-                //    mission.Target.Location
-                //);
-                _context.Missions.Update(mission);
-            }
-
             await _context.SaveChangesAsync();
         }
     }
@@ -89,10 +75,46 @@ public class ServiceAgent
                 if (distance > 200)
                 {
                     _context.Missions.Remove(mission);
-                    _context.SaveChanges();
+                    mission.TimeLeft = distance / 5.0;
+                    await _context.SaveChangesAsync();
                 }
             }
         }
         await MissionCheckAgent(agent);
+    }
+
+    //פונקציה שמחזירה את הנתונים של סוכן אחד עבור התצוגה
+    public async Task<List<AgentForView>> GetAgentForView()
+    {
+        List<AgentForView> agentsForView = new List<AgentForView>();
+
+        var agents = await _context.Agents.Include(l => l.Location).ToListAsync();
+        if (agents != null)
+        {
+            foreach (var agent in agents)
+            {
+                AgentForView agentForView = new AgentForView();
+                agentForView.id = agent.Id;
+                agentForView.Nickname = agent.Nickname;
+                agentForView.Status = agent.Status;
+                if (agent.Location != null)
+                {
+                    agentForView.X = agent.Location.X;
+                    agentForView.Y = agent.Location.Y;
+                }
+                agentForView.CountLiquidations = agent.CountLiquidations;
+
+                Mission? mission = await _context.Missions.FirstOrDefaultAsync(m =>
+                    m.Agent.Id == agent.Id && m.Status == MissionStatus.Status.ASSIGNED.ToString()
+                );
+                if (mission != null)
+                {
+                    agentForView.TimeLeft = mission.TimeLeft;
+                    agentForView.MissionId = mission.Id;
+                }
+                agentsForView.Add(agentForView);
+            }
+        }
+        return agentsForView;
     }
 }
