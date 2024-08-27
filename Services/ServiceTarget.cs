@@ -10,11 +10,12 @@ namespace ManagementOfMossadAgentsAPI.api.Services;
 public class ServiceTarget
 {
     private readonly ManagementOfMossadAgentsDbContext _context;
-    private readonly GeneralFunctions _generalFunctions = new GeneralFunctions();
+    private readonly GeneralFunctions _generalFunctions;
 
     public ServiceTarget(ManagementOfMossadAgentsDbContext context)
     {
         _context = context;
+        _generalFunctions = new GeneralFunctions(_context);
     }
 
     // פונקציה שעוברת על כל הסוכנים עבור מטרה אחת

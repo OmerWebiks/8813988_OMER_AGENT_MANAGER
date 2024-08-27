@@ -10,11 +10,12 @@ namespace ManagementOfMossadAgentsAPI.api.Services;
 public class ServiceAgent
 {
     private readonly ManagementOfMossadAgentsDbContext _context;
-    private readonly GeneralFunctions _generalFunctions = new GeneralFunctions();
+    private readonly GeneralFunctions _generalFunctions;
 
     public ServiceAgent(ManagementOfMossadAgentsDbContext context)
     {
         _context = context;
+        _generalFunctions = new GeneralFunctions(_context);
     }
 
     // פונקציה שעוברת על כל המטרות עבור סוכן אחד

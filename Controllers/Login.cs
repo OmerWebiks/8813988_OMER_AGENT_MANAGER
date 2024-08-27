@@ -35,7 +35,7 @@ namespace ManagementOfMossadAgentsAPI.api.Controllers
                 // things to include in the token
                 Subject = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.Name, userIP), }),
                 // expiration time of the token
-                Expires = DateTime.UtcNow.AddSeconds(30000),
+                Expires = DateTime.UtcNow.AddSeconds(1000),
                 // the secret key of the token
                 SigningCredentials = new SigningCredentials(
                     new SymmetricSecurityKey(key),
